@@ -25,8 +25,10 @@ class ItemsLoader::Loader
                 @update_availiable.push id
             end
         else
-            item[:partner_id] = @partner.id
-            @insert_items.push item
+            item_id = item.delete :partner_item_id
+            item[:created_at] = DateTime.now
+            item[:updated_at] = DateTime.now
+            @insert_items.push [{:partner_id => @partner.id, :partner_item_id => item_id}, item] 
         end
     end
     
@@ -45,14 +47,19 @@ class ItemsLoader::Loader
     end
     
     def update_items
+        #conn = ActiveRecord::Base.connection
+        #conn.execute('create table items_temp')
         Upsert.batch(Item.connection, Item.table_name) do |upsert|
             @update_items.each { |item| upsert.row(*item) }
         end
     end
     def insert_items
-        items = []
-        @insert_items.each { |item| items << Item.new(item) }
-        Item.import items
+        Upsert.batch(Item.connection, Item.table_name) do |upsert|
+            @insert_items.each { |item| upsert.row(*item) }
+        end
+        #items = []
+        #@insert_items.each { |item| items << Item.new(item) }
+        #Item.import items
     end
     
     def update_availability
