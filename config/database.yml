@@ -3,23 +3,33 @@
 #
 #   Ensure the SQLite 3 gem is defined in your Gemfile
 #   gem 'sqlite3'
-#
+# $link = pg_connect("host=localhost dbname=groceries user=postgres password=cloud9isawesome");
 default: &default
-  adapter: sqlite3
+  adapter: postgresql
+  encoding: unicode
+  template: template0
   pool: 5
   timeout: 5000
+  username: postgres
+  password: 12341234
+  
+  
 
 development:
   <<: *default
-  database: db/development.sqlite3
+  database: shmoter_dev
+#  database: db/development.sqlite3
 
 # Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
-# Do not set this db to the same as development or production.
+# re-generated from your development database when you run "rake".upsert  = Upsert.new(Item.connection, Item.table_name)
+# Do not set this db to the same as development or production. upsert.row({:partner_item_id => 1123, :partner_id => 2}, :title => '2134asdflblalba', :availiable_in_store => 'true')
+# upsert.row({:id => 1123}, :title => '2134asdflblalba', :availiable_in_store => 'true')
 test:
   <<: *default
-  database: db/test.sqlite3
+  database: shmoter_test
+#  database: db/test.sqlite3
 
 production:
   <<: *default
-  database: db/production.sqlite3
+  database: shmoter
+#  database: db/production.sqlite3
