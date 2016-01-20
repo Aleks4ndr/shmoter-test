@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :partner do
-    xml_url "MyString"
-xml_type "MyString"
+    xml_url "./partner_items.xml"
+    xml_type "Partner"
   end
 
 end
