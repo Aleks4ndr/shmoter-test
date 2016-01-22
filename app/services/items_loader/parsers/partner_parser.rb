@@ -9,7 +9,7 @@ class ItemsLoader::Parsers::PartnerParser < Nokogiri::XML::SAX::Document
         case name
             when 'item'
                 @entry = attrs.map() { |k,v| [k.to_sym, v] }.to_h
-                @entry[:availiable_in_store] = @entry.delete :available
+                @entry[:availiable_in_store] = (@entry.delete :available) ? 't': 'f'
                 @entry[:partner_item_id] = @entry.delete :id
             when 'title'
                 @in_title = true
@@ -22,10 +22,10 @@ class ItemsLoader::Parsers::PartnerParser < Nokogiri::XML::SAX::Document
         end
     end
     def	end_element(name)
-        @loader.enqueue @entry if name == 'item'
+        @loader.call @entry if name == 'item'
             
     end
     def	end_document
-        @loader.load
+        #@loader.load
     end
 end

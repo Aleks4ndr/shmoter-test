@@ -1,3 +1,5 @@
+require 'open-uri'
+
 class ItemsLoader::Loader
     MAX_QUEUE_LENGTH = 100_000
     def initialize partner
@@ -6,9 +8,69 @@ class ItemsLoader::Loader
         @update_items = []
         @update_availiable = []
         @items = []
-        
-        
     end
+        
+=begin
+        conn.execute 'select * from source;'
+        #@raw.exec 'CREATE TEMP TABLE source(LIKE items INCLUDING ALL) ON COMMIT DROP;'
+        #raw.exec 'select * from source;'
+        result = raw.exec 'select * from items;'
+        result.values
+        raw.exec 'ABORT;'
+        conn = ActiveRecord::Base.connection
+        raw = conn.raw_connection
+        raw.exec 'BEGIN;'
+        raw.exec 'CREATE TEMP TABLE source(LIKE items INCLUDING ALL) ON COMMIT DROP;'
+        raw.copy_data "COPY source (partner_id, title, partner_item_id, availiable_in_store, created_at, updated_at) FROM STDIN CSV" do
+            raw.put_copy_data "1,Apple,123,t,now(),now()\n"
+        end
+        
+        #
+        #raw.exec 'COMMIT;'
+        
+        id | partner_id |  title   | partner_item_id | availiable_in_store |         created_at         |         updated_at  
+        
+=end
+    
+    
+     def load_items
+            
+        conn = ActiveRecord::Base.connection
+        raw = conn.raw_connection
+        raw.exec 'BEGIN;'
+        raw.exec 'CREATE TEMP TABLE source(LIKE items INCLUDING ALL) ON COMMIT DROP;'
+        raw.copy_data "COPY source (partner_id, title, partner_item_id, availiable_in_store, created_at, updated_at) FROM STDIN CSV" do
+            
+            raw.put_copy_data "1,Apple,123,t,now(),now()\n"
+        end
+=begin        
+        WITH upd AS (
+        raw.exec <<SQL
+            UPDATE items t
+               SET availiable_in_store = s.availiable_in_store, title = s.title
+              FROM source s 
+             WHERE t.partner_id = s.partner_id and t.partner_item_id = s.partner_item_id;
+         RETURNING s.id
+        )
+        INSERT INTO items(partner_id, partner_item_id, title, availiable_in_store, created_at, updated_at)
+             SELECT partner_id, partner_item_id, title, availiable_in_store, created_at, updated_at
+               FROM source s LEFT JOIN target t USING(partner_id, partner_item_id)
+              WHERE t.id IS NULL
+           GROUP BY s.id
+          RETURNING t.id
+=end        
+        raw.exec 'COMMIT;'
+    end
+        
+        def parser
+            ::ItemsLoader::Parsers.const_get("#{@partner.xml_type}Parser").new  @loader
+        end
+        
+        def parse
+            stream = open(@partner.xml_url)
+            
+            Nokogiri::XML::SAX::Parser.new(parser).parse(xml_stream)
+        end
     
     
     ##

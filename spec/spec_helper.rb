@@ -90,3 +90,10 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 end
+
+RSpec::Matchers.define :have_same_attributes_as do |expected|
+  match do |actual|
+    ignored = %w(id updated_at created_at)
+    actual.attributes.except(*ignored) == expected.attributes.except(*ignored)
+  end
+end

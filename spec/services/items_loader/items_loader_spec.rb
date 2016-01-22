@@ -6,7 +6,7 @@ describe ItemsLoader::ItemsLoader do
         
        let(:data) do
            data = Tempfile.new('foo')
-           data.write(<<EOF )
+           data.write <<-EOF
 <items>
 	<item available="true" id="123">
 		<title>Рубашка</title>
@@ -18,7 +18,7 @@ describe ItemsLoader::ItemsLoader do
 		<title>Юбка</title>
 	</item>
 </items>
-EOF
+            EOF
             
             
             data.close
@@ -38,21 +38,23 @@ EOF
        
        it 'insert only necessary data' do
            expect(items.size).to eq(3)
+           puts(items)
        end
 
        it 'correctly insert new item' do
             item = partner.items.build(availiable_in_store: true, partner_item_id: 123, title: 'Рубашка')
-            expect(items).to include(item)
+            #item = { availiable_in_store: true, partner_item_id: 123, title: 'Рубашка' }
+            expect(items.find_by(partner_item_id: item.partner_item_id)).to have_same_attributes_as(item)
        end
        
        it 'correctly update new item' do
             item = partner.items.build(availiable_in_store: true, partner_item_id: 1235, title: 'Юбка')
-            expect(items).to include(item)
+            expect(items.find_by(partner_item_id: item.partner_item_id)).to have_same_attributes_as(item)
        end       
        
-       it 'update only availiable_in_store attribute if item is not availiable now' do
-            item = partner.items.build(availiable_in_store: false, partner_item_id: 1234, title: 'Не Джинсы')
-            expect(items).to include(item)
-       end
+      it 'update only availiable_in_store attribute if item is not availiable now' do
+            item = partner.items.build(availiable_in_store: false, partner_item_id: 1234, title: 'Джинсы')
+            expect(items.find_by(partner_item_id: item.partner_item_id)).to have_same_attributes_as(item)
+      end
     end
 end

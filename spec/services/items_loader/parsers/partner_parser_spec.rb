@@ -17,8 +17,8 @@ EOF
 )
             data.rewind
             parser = ItemsLoader::Parsers::PartnerParser.new loader
-            expect(loader).to receive(:enqueue).with({:availiable_in_store=>"true", :partner_item_id=>"123", :title=>"Рубашка"})
-            expect(loader).to receive(:load)
+            #expect(loader).to receive(:enqueue).with({:availiable_in_store=>"true", :partner_item_id=>"123", :title=>"Рубашка"})
+            expect(loader).to receive(:call).with({:availiable_in_store=>"true", :partner_item_id=>"123", :title=>"Рубашка"})
             Nokogiri::XML::SAX::Parser.new(parser).parse(data)
         end
     end
